@@ -1,0 +1,15 @@
+diff --git a/projects/unix/Makefile b/projects/unix/Makefile
+index a0180dc..b88854d 100644
+--- a/projects/unix/Makefile
++++ b/projects/unix/Makefile
+@@ -137,6 +137,10 @@ CFLAGS += $(OPTFLAGS) $(WARNFLAGS) -ffast-math -fsingle-precision-constant -fno-
+ CXXFLAGS += -fvisibility-inlines-hidden -DSDL_VIDEO_OPENGL_ES2=1 -DSDL_VIDEO_OPENGL=0
+ LDFLAGS += $(SHARED)
+ 
++ifeq ($(IS_ODROID), 1)
++  LDLIBS += -lm -L/opt/vc/lib -lEGL
++endif
++
+ ifeq ($(VC), 1)
+   CFLAGS += -DARM -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux -DVC
+   CXXFLAGS += -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux -DVC
