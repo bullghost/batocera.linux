@@ -1,0 +1,15 @@
+diff --git a/projects/unix/Makefile b/projects/unix/Makefile
+index 5b1c364..2dee4fb 100644
+--- a/projects/unix/Makefile
++++ b/projects/unix/Makefile
+@@ -157,6 +157,10 @@ CFLAGS += -D__VEC4_OPT
+ CXXFLAGS += -D__VEC4_OPT
+ endif
+ 
++ifeq ($(IS_ODROID), 1)
++LDLIBS += -lm -L/opt/vc/lib -lEGL
++endif
++
+ ifeq ($(VC), 1)
+ CFLAGS += -DARM -DVC -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux
+ CXXFLAGS += -DVC -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux
