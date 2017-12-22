@@ -1,0 +1,58 @@
+diff --git a/Makefile b/Makefile
+index 37e9488..47b19bc 100644
+--- a/Makefile
++++ b/Makefile
+@@ -119,8 +119,39 @@ BUILD_JPEGLIB = 1
+ #BUILD_MIDILIB = 1
+ VRENDER ?= soft
+ 
++# Odroid
++ifneq (,$(findstring odroid,$(platform)))
++   TARGETLIB := $(TARGET_NAME)_libretro.so
++   TARGETOS=linux
++   fpic := -fPIC
++   SHARED := -shared -Wl,--version-script=src/osd/retro/link.T -Wl,--no-undefined
++   CCOMFLAGS += $(fpic) -fsigned-char -finline  -fno-common -fno-builtin -fweb -frename-registers -falign-functions=16
++   PLATCFLAGS +=  -DALIGN_INTS -DALIGN_SHORTS -fstrict-aliasing -fno-merge-constants
++   PLATCFLAGS +=  -DHAVE_GLES -DHAVE_SDL -DHAVE_ALSA
++   LIBS += -lGLESv2
++   GLES = 1
++   LDFLAGS +=  $(fpic) $(SHARED)
++   REALCC = $(CXX)
++   NATIVECC ?= g++
++   NATIVECFLAGS ?= -std=gnu99
++   BASELIBS += -lpthread
++   CXX ?= g++
++   #workaround for mame bug (c++ in .c files)
++   CC := $(CXX)
++   AR ?= @ar
++   LD := $(CXX)
++   LIBS += -lstdc++ -lpthread -ldl
++   ifneq (,$(findstring armv,$(UNAME) $(platform)))
++      CCOMFLAGS += -mstructure-size-boundary=32
++      PLATCFLAGS += -DSDLMAME_NO64BITIO -DSDLMAME_ARM -DRETRO_SETJMP_HACK -DARM
++      LDFLAGS += -Wl,--fix-cortex-a8 -Wl,--no-as-needed -march=armv7-a -mthumb
++      NOASM = 1
++      FORCE_DRC_C_BACKEND = 1
++   endif
++   CCOMFLAGS += $(PLATCFLAGS)
++
+ # Unix
+-ifneq (,$(findstring unix,$(platform)))
++else ifneq (,$(findstring unix,$(platform)))
+    TARGETLIB := $(TARGET_NAME)_libretro.so
+    TARGETOS=linux
+    fpic := -fPIC
+@@ -908,7 +939,11 @@ endif
+ $(EMULATOR): $(EMUINFOOBJ) $(DRIVLISTOBJ) $(DRVLIBS) $(LIBOSD) $(LIBBUS) $(LIBOPTIONAL) $(LIBEMU) $(LIBDASM) $(LIBUTIL) $(EXPAT) $(SOFTFLOAT) $(JPEG_LIB) $(FLAC_LIB) $(7Z_LIB) $(FORMATS_LIB) $(LUA_LIB) $(SQLITE3_LIB) $(WEB_LIB) $(ZLIB) $(LIBOCORE) $(MIDI_LIB) $(RESFILE)
+ 	$(CC) $(CDEFS) $(CFLAGS) -c $(SRC)/version.c -o $(VERSIONOBJ)
+ 	@echo Linking $(TARGETLIB)
+-	$(LD) $(LDFLAGS) $(LDFLAGSEMULATOR) $(VERSIONOBJ) $^ $(LIBS) -o $(TARGETLIB)
++	ifneq (,$(findstring odroid,$(platform)))
++	  $(LD) -lm $(LDFLAGS) $(LDFLAGSEMULATOR) $(VERSIONOBJ) $^ $(LIBS) -o $(TARGETLIB)
++	else
++	  $(LD) $(LDFLAGS) $(LDFLAGSEMULATOR) $(VERSIONOBJ) $^ $(LIBS) -o $(TARGETLIB)
++	endif
+ 
+ 
+ #-------------------------------------------------
